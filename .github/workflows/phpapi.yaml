@@ -25,5 +25,5 @@ jobs:
       - name: Deploy with helm
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: helm upgrade ${{ env.APPLICATION_NAME }} ./.helm/${{ env.APPLICATION_NAME }}/ --install --wait --atomic --namespace=default --set=app.name=${{ env.APPLICATION_NAME }} --values=./.helm/${{ env.APPLICATION_NAME }}/values.yaml --set image.tag=${{ env.SHORT_SHA }}
+          exec: helm upgrade ${{ env.APPLICATION_NAME }} ./${{ env.APPLICATION_NAME }} --install --wait --atomic --namespace=default --set=app.name=${{ env.APPLICATION_NAME }} --values=./${{ env.APPLICATION_NAME }}/values.yaml --set image.tag=${{ env.SHORT_SHA }}
           kubeconfig: '${{ secrets.KUBECONFIG }}'
