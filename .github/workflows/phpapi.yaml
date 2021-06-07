@@ -1,0 +1,27 @@
+name: PHPAPI deployment
+on:
+  push:
+    branches:
+      - main
+env:
+  APPLICATION_NAME: phpapi
+jobs:
+  push_to_registry:
+    name: Build, Push, Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Docker build
+        run: |
+          echo ${{ secrets.DOCKERTOKEN }} |  docker login -u aolishchuk --password-stdin
+          docker build -t aolishchuk/${{ env.APPLICATION_NAME }}:${{ env.SHORT_SHA }} -t aolishchuk/${{ env.APPLICATION_NAME }}:latest .
+      - name: Docker push to Docker hub
+        run: |
+          docker push aolishchuk/${{ env.APPLICATION_NAME }}:${{ env.SHORT_SHA }}
+          docker push aolishchuk/${{ env.APPLICATION_NAME }}:latest
+      - name: Deploy with helm
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade ${{ env.APPLICATION_NAME }} ./.helm/${{ env.APPLICATION_NAME }}/ --install --wait --atomic --namespace=default --set=app.name=${{ env.APPLICATION_NAME }} --values=./.helm/${{ env.APPLICATION_NAME }}/values.yaml --set image.tag=${{ env.SHORT_SHA }}
+          kubeconfig: '${{ secrets.KUBECONFIG }}'
